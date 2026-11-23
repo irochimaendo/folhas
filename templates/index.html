@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Qual é o problema desta folha?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --tinta: #17301f; --musgo: #3f6b3a; --nevoa: #eef1ea;
+    --linha: #d3d9c8; --lesao: #b8891a; --alerta: #8a3b12;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--nevoa); color: var(--tinta);
+         font: 18px/1.55 "Source Sans 3", system-ui, sans-serif; }
+  main { max-width: 1040px; margin: 0 auto; padding: 56px 24px;
+         display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+  h1 { font: 800 clamp(2.2rem, 5vw, 3.4rem)/1.05 "Bricolage Grotesque", sans-serif;
+       margin: 0 0 16px; letter-spacing: -0.02em; }
+  p.ajuda { max-width: 46ch; margin: 0 0 28px; }
+  .arquivo { display: block; border: 2px dashed var(--musgo); border-radius: 12px;
+             padding: 18px 20px; cursor: pointer; background: #fff8; }
+  .arquivo:hover, .arquivo:focus-within { background: #fff; }
+  .arquivo input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .arquivo span { font-weight: 600; }
+  .arquivo.sobre { background: #fff; border-style: solid; }
+  .dica { margin: 10px 0 0; font-size: .92rem; opacity: .8; }
+  .acoes { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  button.secundario { background: transparent; color: var(--tinta); border: 2px solid var(--tinta); padding: 12px 22px; }
+  button.secundario:hover { background: var(--tinta); color: #fff; }
+  button { margin-top: 16px; font: 600 1.05rem "Source Sans 3", sans-serif; color: #fff;
+           background: var(--tinta); border: 0; border-radius: 10px; padding: 14px 32px; cursor: pointer; }
+  button:hover { background: var(--musgo); }
+  button:disabled { opacity: .6; cursor: wait; }
+  :focus-visible { outline: 3px solid var(--lesao); outline-offset: 3px; }
+  .erro { color: var(--alerta); font-weight: 600; margin-top: 16px; }
+
+  .folha { width: min(100%, 420px); aspect-ratio: 1; margin: 0 auto; overflow: hidden;
+           border-radius: 140px 0 140px 0; background: var(--linha);
+           display: grid; place-items: center; color: var(--musgo); text-align: center; }
+  .folha img { width: 100%; height: 100%; object-fit: cover; }
+  .resultado { margin-top: 28px; }
+  .resultado h2 { font: 800 1.9rem/1.1 "Bricolage Grotesque", sans-serif; margin: 0 0 6px; }
+  .resultado .confianca { margin: 0 0 18px; }
+  .incerto { color: var(--alerta); font-weight: 600; }
+  .barra { display: grid; grid-template-columns: 1fr 56px; gap: 4px 12px; align-items: center; margin: 6px 0; font-size: .95rem; }
+  .barra i { grid-column: 1 / -1; display: block; height: 6px; background: var(--linha); border-radius: 3px; }
+  .barra i b { display: block; height: 100%; background: var(--musgo); border-radius: 3px; }
+  .barra:first-of-type i b { background: var(--lesao); }
+  .barra em { font-style: normal; text-align: right; font-variant-numeric: tabular-nums; }
+
+  @media (max-width: 800px) { main { grid-template-columns: 1fr; gap: 32px; padding: 32px 20px; } }
+</style>
+</head>
+<body>
+<main>
+  <section>
+    <h1>Qual é o problema desta folha?</h1>
+    <p class="ajuda">Envie a foto de uma única folha, de perto e com boa luz. O modelo Naive Bayes indica a classe mais provável e quão confiante ele está.</p>
+    <form method="post" enctype="multipart/form-data" id="form">
+      <label class="arquivo" id="area">
+        <input type="file" name="foto" id="foto" accept="image/*" required>
+        <span id="nome">Escolher foto da folha</span>
+      </label>
+      <p class="dica">Você também pode arrastar uma imagem para cá ou colar com <strong>Ctrl+V</strong>.</p>
+      <div class="acoes">
+        <button type="submit" id="botao">Prever</button>
+        <button type="button" id="colar" class="secundario">Colar imagem</button>
+      </div>
+      <p class="erro" id="aviso" role="alert" hidden></p>
+    </form>
+    {% if erro %}<p class="erro" role="alert">{{ erro }}</p>{% endif %}
+  </section>
+
+  <section>
+    <div class="folha">
+      {% if imagem %}
+        <img id="previa" src="data:{{ mime }};base64,{{ imagem }}" alt="Foto enviada">
+      {% else %}
+        <p id="vazio">Sua foto aparece aqui</p>
+        <img id="previa" alt="Prévia da foto" hidden>
+      {% endif %}
+    </div>
+
+    {% if top %}
+    <div class="resultado" aria-live="polite">
+      <h2>{{ top[0][0] }}</h2>
+      {% if confiavel %}
+        <p class="confianca">Probabilidade estimada: {{ top[0][1] }}%</p>
+      {% else %}
+        <p class="confianca incerto">Não tenho certeza. Tente outra foto, mais de perto e com a folha inteira no quadro.</p>
+      {% endif %}
+      {% for nome, pct in top %}
+        <div class="barra"><span>{{ nome }}</span><em>{{ pct }}%</em><i><b style="width: {{ pct }}%"></b></i></div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </section>
+</main>
+<script>
+  const foto = document.getElementById("foto"), previa = document.getElementById("previa");
+  const area = document.getElementById("area"), aviso = document.getElementById("aviso");
+
+  function mostrarAviso(texto) { aviso.textContent = texto; aviso.hidden = !texto; }
+
+  // Usa o mesmo campo de upload para arquivo escolhido, arrastado ou colado
+  function definirArquivo(f) {
+    if (!f || !f.type.startsWith("image/")) { mostrarAviso("Isso não parece ser uma imagem."); return; }
+    mostrarAviso("");
+    const dt = new DataTransfer();
+    dt.items.add(f);
+    foto.files = dt.files;
+    document.getElementById("nome").textContent = f.name || "Imagem colada";
+    previa.src = URL.createObjectURL(f);
+    previa.hidden = false;
+    const vazio = document.getElementById("vazio"); if (vazio) vazio.hidden = true;
+  }
+
+  // 1) Escolher arquivo
+  foto.addEventListener("change", () => definirArquivo(foto.files[0]));
+
+  // 2) Colar com Ctrl+V (imagem copiada do chat, de um site, de um print...)
+  document.addEventListener("paste", (e) => {
+    for (const item of (e.clipboardData ? e.clipboardData.items : [])) {
+      if (item.kind === "file" && item.type.startsWith("image/")) {
+        const arq = item.getAsFile();
+        definirArquivo(new File([arq], "colada." + (item.type.split("/")[1] || "png"), { type: item.type }));
+        e.preventDefault();
+        return;
+      }
+    }
+  });
+
+  // 3) Botão "Colar imagem" (lê direto da área de transferência)
+  document.getElementById("colar").addEventListener("click", async () => {
+    try {
+      for (const item of await navigator.clipboard.read()) {
+        const tipo = item.types.find((t) => t.startsWith("image/"));
+        if (tipo) {
+          const blob = await item.getType(tipo);
+          definirArquivo(new File([blob], "colada." + (tipo.split("/")[1] || "png"), { type: tipo }));
+          return;
+        }
+      }
+      mostrarAviso("Não há nenhuma imagem na área de transferência.");
+    } catch (err) {
+      mostrarAviso("O navegador não permitiu ler a área de transferência. Use Ctrl+V.");
+    }
+  });
+
+  // 4) Arrastar e soltar
+  ["dragenter", "dragover"].forEach((ev) => area.addEventListener(ev, (e) => { e.preventDefault(); area.classList.add("sobre"); }));
+  ["dragleave", "drop"].forEach((ev) => area.addEventListener(ev, (e) => { e.preventDefault(); area.classList.remove("sobre"); }));
+  area.addEventListener("drop", (e) => definirArquivo(e.dataTransfer.files[0]));
+
+  document.getElementById("form").addEventListener("submit", () => {
+    const b = document.getElementById("botao"); b.disabled = true; b.textContent = "Analisando...";
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+{
+  "dataset": "/kaggle/input/plantvillage-dataset/plantvillage dataset/color",
+  "total_imagens_encontradas": 26574,
+  "imagens_validas": 26574,
+  "imagens_com_erro": 0,
+  "total_classes": 38,
+  "classes": [
+    "Apple___Apple_scab",
+    "Apple___Black_rot",
+    "Apple___Cedar_apple_rust",
+    "Apple___healthy",
+    "Blueberry___healthy",
+    "Cherry_(including_sour)___Powdery_mildew",
+    "Cherry_(including_sour)___healthy",
+    "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot",
+    "Corn_(maize)___Common_rust_",
+    "Corn_(maize)___Northern_Leaf_Blight",
+    "Corn_(maize)___healthy",
+    "Grape___Black_rot",
+    "Grape___Esca_(Black_Measles)",
+    "Grape___Leaf_blight_(Isariopsis_Leaf_Spot)",
+    "Grape___healthy",
+    "Orange___Haunglongbing_(Citrus_greening)",
+    "Peach___Bacterial_spot",
+    "Peach___healthy",
+    "Pepper,_bell___Bacterial_spot",
+    "Pepper,_bell___healthy",
+    "Potato___Early_blight",
+    "Potato___Late_blight",
+    "Potato___healthy",
+    "Raspberry___healthy",
+    "Soybean___healthy",
+    "Squash___Powdery_mildew",
+    "Strawberry___Leaf_scorch",
+    "Strawberry___healthy",
+    "Tomato___Bacterial_spot",
+    "Tomato___Early_blight",
+    "Tomato___Late_blight",
+    "Tomato___Leaf_Mold",
+    "Tomato___Septoria_leaf_spot",
+    "Tomato___Spider_mites Two-spotted_spider_mite",
+    "Tomato___Target_Spot",
+    "Tomato___Tomato_Yellow_Leaf_Curl_Virus",
+    "Tomato___Tomato_mosaic_virus",
+    "Tomato___healthy"
+  ],
+  "dimensao_caracteristicas": 810,
+  "versao_extrator": "2.0.0",
+  "algoritmo": "PowerTransformer + PCA(whiten) + GaussianNB",
+  "calibrado": true,
+  "limiar_sugerido": 0.7,
+  "avaliacao": {
+    "proporcao_teste": 0.2,
+    "acuracia": 0.9269990592662276,
+    "f1_macro": 0.9291957839233311,
+    "acuracia_balanceada": 0.9295573980406229,
+    "busca": {
+      "metodo": "GridSearchCV + StratifiedKFold",
+      "melhor_f1_macro_cv": 0.930868141918086,
+      "n_componentes": 128,
+      "var_smoothing": 1e-12,
+      "folds_cv": 3
+    },
+    "tabela_limiar": [
+      {
+        "limiar": 0.5,
+        "respondidas": 0.9954844778927564,
+        "acuracia": 0.9296919296919297
+      },
+      {
+        "limiar": 0.6,
+        "respondidas": 0.9900282220131703,
+        "acuracia": 0.9327251995438997
+      },
+      {
+        "limiar": 0.7,
+        "respondidas": 0.9849482596425212,
+        "acuracia": 0.935243553008596
+      },
+      {
+        "limiar": 0.8,
+        "respondidas": 0.9753527751646284,
+        "acuracia": 0.9388503086419753
+      },
+      {
+        "limiar": 0.9,
+        "respondidas": 0.956161806208843,
+        "acuracia": 0.9476584022038568
+      }
+    ]
+  },
+  "modelo": "/content/saida_treinamento/modelo_folhas.joblib"
+}
